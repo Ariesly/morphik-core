@@ -21,14 +21,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercased repository name
+        id: repo
+        run: echo "repo_name_lc=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build App Image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik
+          IMAGE_NAME=ghcr.io/${{ steps.repo.outputs.repo_name_lc }}/morphik
           docker build -f Dockerfile -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} .
 
       - name: Push App Image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik
+          IMAGE_NAME=ghcr.io/${{ steps.repo.outputs.repo_name_lc }}/morphik
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
 
@@ -47,13 +51,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercased repository name
+        id: repo
+        run: echo "repo_name_lc=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build Postgres Image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik-postgres
+          IMAGE_NAME=ghcr.io/${{ steps.repo.outputs.repo_name_lc }}/morphik-postgres
           docker build -f postgres.dockerfile -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} .
 
       - name: Push Postgres Image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik-postgres
+          IMAGE_NAME=ghcr.io/${{ steps.repo.outputs.repo_name_lc }}/morphik-postgres
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
