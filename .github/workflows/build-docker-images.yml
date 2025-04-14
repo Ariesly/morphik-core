@@ -1,0 +1,59 @@
+name: Build & Push Docker Images to GHCR
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [on-update]
+
+jobs:
+  build-app:
+    name: Build App Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build App Image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik
+          docker build -f Dockerfile -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} .
+
+      - name: Push App Image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.sha }}
+
+  build-postgres:
+    name: Build Postgres Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Postgres Image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik-postgres
+          docker build -f postgres.dockerfile -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ github.sha }} .
+
+      - name: Push Postgres Image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/morphik-postgres
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.sha }}
